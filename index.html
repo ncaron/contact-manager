@@ -16,7 +16,7 @@
     <div class="wrapper">
       <main>
         <section id="menu">
-          <a href="#" id="add-contact" class="btn">Add Contact</a>
+          <button id="add-contact">Add Contact</button>
           <input type="text" placeholder="Search">
         </section>
 
@@ -27,19 +27,19 @@
             <fieldset>
               <dl>
                 <dt><label for="name">Full Name:</label></dt><!--
-                --><dd><input type="text" id="name"></dd>
+                --><dd><input type="text" id="name" required></dd>
 
                 <dt><label for="email">Email Address:</label></dt><!--
-                --><dd><input type="email" id="email"></dd>
+                --><dd><input type="email" id="email" required></dd>
 
                 <dt><label for="phone">Telephone Number:</label></dt><!--
-                --><dd><input type="text" id="phone"></dd>
+                --><dd><input type="text" id="phone" required></dd>
               </dl>
             </fieldset>
 
             <div class="btn-group">
-              <a href="#" id="submit" class="btn">Submit</a><!--
-              --><a href="#" id="cancel-add" class="btn">Cancel</a>
+              <button type="submit" id="submit">Submit</button><!--
+              --><button type="reset" id="cancel-add">Cancel</button>
             </div>
           </form>
         </section>
@@ -71,8 +71,8 @@
           <dd>{{email}}</dd>
         </dl>
 
-        <a href="#" id="edit" class="btn">Edit</a>
-        <a href="#" id="delete" class="btn">Delete</a>
+        <button id="edit">Edit</button>
+        <button id="delete">Delete</button>
       </div>
       {{/each}}
     </script>

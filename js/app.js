@@ -26,8 +26,7 @@ var Form = {
   toggle: function() {
     this.$section.slideToggle();
     Contacts.$section.slideToggle();
-
-    $('input').val('');
+    $('form').trigger('reset');
   },
   getData: function() {
     return {
@@ -53,7 +52,7 @@ var App = {
     this.contactTemplate = Handlebars.compile(contactTemplate);
   },
   bindEvents: function() {
-    $(document).on('click', 'a', function(e) {
+    $(document).on('click', 'button', function(e) {
       e.preventDefault();
 
       var targetID = e.target.id;

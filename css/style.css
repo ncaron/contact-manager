@@ -5,8 +5,9 @@ body { font: normal 16px Helvetica, Arial, sans-serif; }
 a { text-decoration: none; }
 
 /* BUTTON */
-.btn {
+button {
   display: inline-block;
+  background: inherit;
   padding: 10px 15px;
   color: #654b8e;
   border: 1px solid #654b8e;
@@ -14,7 +15,7 @@ a { text-decoration: none; }
   transition: all .25s ease-in;
 }
 
-.btn:hover {
+button:hover {
   background: #654b8e;
   color: white;
 }
@@ -78,7 +79,7 @@ main { padding-bottom: 150px; }
   z-index: 1;
 }
 
-#menu a { margin-right: 150px; }
+#menu button { margin-right: 150px; }
 
 
 /* FOOTER */
@@ -128,8 +129,8 @@ footer {
   text-align: center;
 }
 
-.btn-group .btn { width: 45%; }
-.btn-group .btn + .btn { margin-left: 10%; }
+.btn-group button { width: 45%; }
+.btn-group button + button { margin-left: 10%; }
 
 
 /* CONTACTS */
