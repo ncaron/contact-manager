@@ -1,0 +1,146 @@
+@import url("reset.css");
+
+* { box-sizing: border-box; }
+body { font: normal 16px Helvetica, Arial, sans-serif; }
+a { text-decoration: none; }
+
+/* BUTTON */
+.btn {
+  display: inline-block;
+  padding: 10px 15px;
+  color: #654b8e;
+  border: 1px solid #654b8e;
+  border-radius: 5px;
+  transition: all .25s ease-in;
+}
+
+.btn:hover {
+  background: #654b8e;
+  color: white;
+}
+
+
+/* INPUTS */
+input {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  transition: all .25s ease-in;
+}
+
+input:focus {
+  outline: none;
+  border: 1px solid rgba(101, 175, 233, .75);
+  box-shadow: 0 0 10px 1px rgba(101, 175, 233, .5);
+}
+
+
+/* HEADER */
+header {
+  background: #654b8e;
+  padding: 25px 0;
+  color: rgba(255, 255, 255, .7);
+  font-size: 20px;
+  text-align: center;
+}
+
+header a {
+  display: inline-block;
+  margin-bottom: 20px;
+  color: white;
+  font-size: 36px;
+}
+
+
+/* WRAPPER */
+.wrapper {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+
+/* MENU */
+#menu {
+  background: #f5f5f5;
+  padding: 25px 0;
+  margin-bottom: 50px;
+  text-align: center;
+  border: 1px solid #dfdfdf;
+  border-top: none;
+  border-bottom-right-radius: 5px;
+  border-bottom-left-radius: 5px;
+}
+
+#menu a { margin-right: 150px; }
+
+
+/* FOOTER */
+footer {
+  padding-top: 20px;
+  margin-top: 100px;
+  text-align: center;
+  border-top: 1px solid #dfdfdf;
+}
+
+
+/* NEW CONTACT */
+#add-new { font-size: 14px; }
+
+#add-new h2 {
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+  font-size: 30px;
+  text-align: center;
+  border-bottom: 1px solid #dfdfdf;
+}
+
+#add-new form {
+  width: 500px;
+  margin: 0 auto;
+}
+
+#add-new dt {
+  float: left;
+  width: 30%;
+  padding: 10px 0;
+  font-weight: bold;
+  text-align: right;
+}
+
+#add-new dd { margin: 25px 0 25px 35%; }
+#add-new input { width: 100%; }
+
+.btn-group {
+  margin-left: 35%;
+  text-align: center;
+}
+
+.btn-group .btn { width: 45%; }
+.btn-group .btn + .btn { margin-left: 10%; }
+
+/* NO CONTACTS */
+#no-contacts {
+  background: #f5f5f5;
+  padding: 40px 0;
+  font-size: 24px;
+  text-align: center;
+  border: 1px solid #dfdfdf;
+  border-radius: 5px;
+}
+
+
+/* CONTACT */
+.contact {
+  display: inline-block;
+  vertical-align: top;
+  width: 25%;
+  font-size: 14px;
+}
+
+.contact h3 {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.contact dt { font-weight: bold; }
+.contact dd { margin: 2px 0 10px 0; }
