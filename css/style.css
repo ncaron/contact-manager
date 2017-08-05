@@ -51,9 +51,13 @@ header a {
   font-size: 36px;
 }
 
+/* MAIN */
+main { padding-bottom: 150px; }
+
 
 /* WRAPPER */
 .wrapper {
+  position: relative;
   max-width: 1000px;
   margin: 0 auto;
 }
@@ -61,7 +65,10 @@ header a {
 
 /* MENU */
 #menu {
+  position: absolute;
+  top: 0;
   background: #f5f5f5;
+  width: 100%;
   padding: 25px 0;
   margin-bottom: 50px;
   text-align: center;
@@ -69,6 +76,7 @@ header a {
   border-top: none;
   border-bottom-right-radius: 5px;
   border-bottom-left-radius: 5px;
+  z-index: 1;
 }
 
 #menu a { margin-right: 150px; }
@@ -77,14 +85,20 @@ header a {
 /* FOOTER */
 footer {
   padding-top: 20px;
-  margin-top: 100px;
   text-align: center;
   border-top: 1px solid #dfdfdf;
 }
 
 
 /* NEW CONTACT */
-#add-new { font-size: 14px; }
+#add-new {
+  display: none;
+  position: relative;
+  background: white;
+  padding-top: 50px;
+  font-size: 14px;
+  z-index: 2;
+}
 
 #add-new h2 {
   padding-bottom: 20px;
@@ -118,8 +132,16 @@ footer {
 .btn-group .btn { width: 45%; }
 .btn-group .btn + .btn { margin-left: 10%; }
 
+
+/* CONTACTS */
+#contacts {
+  position: relative;
+  padding-top: 100px;
+  font-size: 0;
+}
+
 /* NO CONTACTS */
-#no-contacts {
+.no-contacts {
   background: #f5f5f5;
   padding: 40px 0;
   font-size: 24px;
@@ -133,8 +155,17 @@ footer {
 .contact {
   display: inline-block;
   vertical-align: top;
-  width: 25%;
+  min-width: 24%;
+  margin: 0 .5% 20px .5%;
   font-size: 14px;
+}
+
+.contact::after {
+  display: block;
+  content: "";
+  min-width: 100%;
+  margin-top: 10px;
+  border-bottom: 1px solid #dfdfdf;
 }
 
 .contact h3 {

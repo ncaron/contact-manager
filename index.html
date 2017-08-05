@@ -27,22 +27,24 @@
             <fieldset>
               <dl>
                 <dt><label for="name">Full Name:</label></dt><!--
-                --><dd><input type="text"></dd>
+                --><dd><input type="text" id="name"></dd>
 
                 <dt><label for="email">Email Address:</label></dt><!--
-                --><dd><input type="email"></dd>
+                --><dd><input type="email" id="email"></dd>
 
                 <dt><label for="phone">Telephone Number:</label></dt><!--
-                --><dd><input type="text"></dd>
+                --><dd><input type="text" id="phone"></dd>
               </dl>
             </fieldset>
 
             <div class="btn-group">
               <a href="#" id="submit" class="btn">Submit</a><!--
-              --><a href="#" id="cancel" class="btn">Cancel</a>
+              --><a href="#" id="cancel-add" class="btn">Cancel</a>
             </div>
           </form>
         </section>
+
+        <section id="contacts"></section>
       </main>
 
       <footer>
@@ -51,21 +53,28 @@
     </div>
 
     <script type="text/x-handlebars-template" id="contact-error">
-      <p>There are no contacts.</p>
+      <div class="no-contacts">
+        <p>{{error}}</p>
+      </div>
     </script>
 
     <script type="text/x-handlebars-template" id="contact">
-      <div class="contact">
-        <h3>Niko Caron</h3>
+      {{#each contact}}
+      <div class="contact" id="{{id}}">
+        <h3>{{name}}</h3>
 
         <dl>
           <dt>Phone Number:</dt>
-          <dd>506 473 7164</dd>
+          <dd>{{phone}}</dd>
 
           <dt>Email:</dt>
-          <dd>niko.caron90@gmail.com</dd>
+          <dd>{{email}}</dd>
         </dl>
+
+        <a href="#" id="edit" class="btn">Edit</a>
+        <a href="#" id="delete" class="btn">Delete</a>
       </div>
+      {{/each}}
     </script>
 
     <script src="js/app.js"></script>
