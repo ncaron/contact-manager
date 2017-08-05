@@ -93,6 +93,7 @@ var Form = {
   },
   resetForm: function() {
     this.$form.find('input').removeClass('invalid');
+    this.$form.find('.error').text('');
 
     this.$formError.animate({
       opacity: 0,
