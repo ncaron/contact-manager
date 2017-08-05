@@ -24,16 +24,26 @@
           <h2>Create Contact</h2>
 
           <form action="#" method="post">
+            <p id="form-error">Please fix the errors before submitting the form.</p>
             <fieldset>
               <dl>
                 <dt><label for="name">Full Name:</label></dt><!--
-                --><dd><input type="text" id="name" required></dd>
+                --><dd>
+                  <input type="text" id="name" placeholder="Your Name" pattern="[a-zA-Z' ]+" required>
+                  <span class="error"></span>
+                </dd>
 
                 <dt><label for="email">Email Address:</label></dt><!--
-                --><dd><input type="email" id="email" required></dd>
+                --><dd>
+                  <input type="email" id="email" placeholder="username@domain.com" required>
+                  <span class="error"></span>
+                </dd>
 
                 <dt><label for="phone">Telephone Number:</label></dt><!--
-                --><dd><input type="text" id="phone" required></dd>
+                --><dd>
+                  <input type="text" id="phone" placeholder="555-555-5555" pattern="[0-9()+\-]+" required>
+                  <span class="error"></span>
+                </dd>
               </dl>
             </fieldset>
 

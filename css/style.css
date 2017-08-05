@@ -35,6 +35,9 @@ input:focus {
   box-shadow: 0 0 10px 1px rgba(101, 175, 233, .5);
 }
 
+input.invalid { border-color: red; }
+input.invalid:focus { box-shadow: 0 0 10px 1px red; }
+
 
 /* HEADER */
 header {
@@ -119,6 +122,21 @@ footer {
   padding: 10px 0;
   font-weight: bold;
   text-align: right;
+}
+
+#form-error,
+.error {
+  color: red;
+  font-size: 16px;
+  text-align: center;
+}
+
+#form-error { opacity: 0; }
+
+.error {
+  display: block;
+  margin: 10px 0;
+  text-align: left;
 }
 
 #add-new dd { margin: 25px 0 25px 35%; }

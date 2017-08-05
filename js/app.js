@@ -22,11 +22,13 @@ var Contacts = {
 };
 
 var Form = {
+  $form: $('form'),
+  $formError: $('#form-error'),
   $section: $('#add-new'),
   toggle: function() {
     this.$section.slideToggle();
     Contacts.$section.slideToggle();
-    $('form').trigger('reset');
+    this.$form.trigger('reset');
   },
   getData: function() {
     return {
@@ -36,12 +38,87 @@ var Form = {
       phone: $('#phone').val(),
     };
   },
-  handleSubmit: function() {
-    Contacts.add(this.getData());
-    this.toggle();
-  }
-};
+  validateInput: function(input) {
+    var $errorBox = $(input).parent().find('.error');
+    var inputID = input.id;
+    var validity = input.validity;
+    var error = '';
 
+    if (!validity.valid) {
+      input.classList.add('invalid');
+
+      if (validity.valueMissing) {
+        error = 'This is a required field.'
+      } else {
+        if (inputID === 'name') {
+          error = 'Name may only contain letters, spaces and apostrophes.'
+        } else if (inputID === 'email') {
+          error = 'Please enter a valid email address.'
+        } else if (inputID === 'phone') {
+          error = 'Phone Number may only contain numbers, dashes, pluses, and parentheses.'
+        }
+      }
+
+      $errorBox.text(error);
+      return false;
+    } else {
+      input.classList.remove('invalid');
+      $errorBox.text('');
+      return true;
+    }
+  },
+  validateForm: function() {
+    var self = this;
+    var isValid = true;
+
+    this.$form.find('input').each(function() {
+      if (!self.validateInput(this)) {
+        isValid = false;
+      }
+    });
+
+    return isValid;
+  },
+  handleSubmit: function() {
+    var data = this.getData();
+
+    if (this.validateForm()) {
+      Contacts.add(data);
+      this.toggle();
+    } else {
+      this.$formError.animate({
+        opacity: 1,
+      }, 400);
+    }
+  },
+  resetForm: function() {
+    this.$form.find('input').removeClass('invalid');
+
+    this.$formError.animate({
+      opacity: 0,
+    }, 400);
+  },
+  preventInvalidKeys: function(e) {
+    var target = e.target;
+    var key = e.key;
+
+    if (target.id === 'name' && !key.match(/[a-z' ]/i) ||
+        target.id === 'phone' && !key.match(/[0-9()+\-]/)) {
+      e.preventDefault();
+    }
+  },
+  bindEvents: function() {
+    this.$form.on('input', function(e) {
+      this.validateInput(e.target);
+    }.bind(this));
+
+    this.$form.on('keypress', 'input', this.preventInvalidKeys.bind(this));
+    this.$form.on('reset', this.resetForm.bind(this));
+  },
+  init: function() {
+    this.bindEvents();
+  },
+};
 
 var App = {
   cacheTemplates: function() {
@@ -73,6 +150,7 @@ var App = {
   init: function() {
     this.cacheTemplates();
     this.bindEvents();
+    Form.init();
     Contacts.init();
   }
 };
