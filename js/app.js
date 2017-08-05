@@ -1,8 +1,50 @@
+var Contacts = {
+  $section: $('#contacts'),
+  id: 1,
+  list: [],
+  add: function(contact) {
+    this.list.push(contact);
+    this.id += 1;
+    this.render(this.list)
+  },
+  render: function() {
+    this.$section.html('');
+
+    if (this.list.length === 0) {
+      this.$section.html(App.errorTemplate({error: 'No Contacts.'}));
+    } else {
+      this.$section.html(App.contactTemplate({contact: this.list}));
+    }
+  },
+  init: function() {
+    this.render();
+  }
+};
+
+var Form = {
+  $section: $('#add-new'),
+  toggle: function() {
+    this.$section.slideToggle();
+    Contacts.$section.slideToggle();
+
+    $('input').val('');
+  },
+  getData: function() {
+    return {
+      id: Contacts.id,
+      name: $('#name').val(),
+      email: $('#email').val(),
+      phone: $('#phone').val(),
+    };
+  },
+  handleSubmit: function() {
+    Contacts.add(this.getData());
+    this.toggle();
+  }
+};
+
+
 var App = {
-  $contactForm: $('#add-new'),
-  $contactsSection: $('#contacts'),
-  contacts: [],
-  contactID: 1,
   cacheTemplates: function() {
     var errorTemplate = $('#contact-error').remove().html();
     var contactTemplate = $('#contact').remove().html();
@@ -10,41 +52,7 @@ var App = {
     this.errorTemplate = Handlebars.compile(errorTemplate);
     this.contactTemplate = Handlebars.compile(contactTemplate);
   },
-  renderContacts: function(contacts) {
-    this.$contactsSection.html('');
-
-    if (contacts.length === 0) {
-      this.$contactsSection.append(this.errorTemplate({error: 'No Contacts.'}));
-    } else {
-      this.$contactsSection.append(this.contactTemplate({contact: this.contacts}));
-    }
-  },
-  toggleForm: function() {
-    this.$contactForm.slideToggle();
-    this.$contactsSection.slideToggle();
-
-    $('input').val('');
-  },
-  handleSubmit: function() {
-    this.addContact(this.getData());
-    this.toggleForm();
-  },
-  getData: function() {
-    return {
-      id: this.contactID,
-      name: $('#name').val(),
-      email: $('#email').val(),
-      phone: $('#phone').val(),
-    };
-  },
-  addContact: function(contact) {
-    this.contacts.push(contact);
-    this.contactID += 1;
-    this.renderContacts(this.contacts)
-  },
   bindEvents: function() {
-    var self = this;
-
     $(document).on('click', 'a', function(e) {
       e.preventDefault();
 
@@ -52,13 +60,13 @@ var App = {
 
       switch (targetID) {
         case 'add-contact':
-          self.toggleForm();
+          Form.toggle();
           break;
         case 'cancel-add':
-          self.toggleForm();
+          Form.toggle();
           break;
         case 'submit':
-          self.handleSubmit();
+          Form.handleSubmit();
           break;
       }
     });
@@ -66,7 +74,7 @@ var App = {
   init: function() {
     this.cacheTemplates();
     this.bindEvents();
-    this.renderContacts(this.contacts);
+    Contacts.init();
   }
 };
 
