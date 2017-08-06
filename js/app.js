@@ -1,11 +1,34 @@
 var Contacts = {
   $section: $('#contacts'),
-  id: 1,
+  id: 0,
   list: [],
+  currentContact: {},
+  editing: false,
   add: function(contact) {
-    this.list.push(contact);
+    contact.id = this.id;
     this.id += 1;
+    this.list.push(contact);
     this.render(this.list)
+  },
+  edit: function() {
+    var $contactDiv = this.$section.find('[data-id="' + this.currentContact.id + '"]');
+    var editedContact = Form.getData();
+    editedContact.id = this.currentContact.id;
+    this.list[this.currentContact.id] = editedContact;
+
+    $contactDiv.find('[data-field="name"]').text(editedContact.name);
+    $contactDiv.find('[data-field="email"]').text(editedContact.email);
+    $contactDiv.find('[data-field="phone"]').text(editedContact.phone);
+  },
+  handleEdit: function(currentContact) {
+    this.currentContact.id = currentContact.data('id');
+    this.currentContact.name = currentContact.find('[data-field="name"]').text();
+    this.currentContact.email = currentContact.find('[data-field="email"]').text();
+    this.currentContact.phone = currentContact.find('[data-field="phone"]').text();
+
+    Form.toggle();
+    Form.setData(this.currentContact);
+    this.editing = true;
   },
   render: function() {
     this.$section.html('');
@@ -16,7 +39,22 @@ var Contacts = {
       this.$section.html(App.contactTemplate({contact: this.list}));
     }
   },
+  bindEvents: function() {
+    var self = this;
+
+    this.$section.on('click', 'button', function(e) {
+      e.preventDefault();
+
+      var targetID = e.target.id;
+      var currentContact = $(e.target.closest('.contact'));
+
+      if (targetID === 'edit') {
+        self.handleEdit(currentContact);
+      }
+    });
+  },
   init: function() {
+    this.bindEvents();
     this.render();
   }
 };
@@ -32,11 +70,15 @@ var Form = {
   },
   getData: function() {
     return {
-      id: Contacts.id,
       name: $('#name').val(),
       email: $('#email').val(),
       phone: $('#phone').val(),
     };
+  },
+  setData: function(currentContact) {
+    $('#name').val(currentContact.name);
+    $('#email').val(currentContact.email);
+    $('#phone').val(currentContact.phone);
   },
   validateInput: function(input) {
     var $errorBox = $(input).parent().find('.error');
@@ -83,7 +125,12 @@ var Form = {
     var data = this.getData();
 
     if (this.validateForm()) {
-      Contacts.add(data);
+      if (Contacts.editing) {
+        Contacts.edit();
+      } else {
+        Contacts.add(data);
+      }
+
       this.toggle();
     } else {
       this.$formError.animate({
@@ -137,6 +184,7 @@ var App = {
 
       switch (targetID) {
         case 'add-contact':
+          Contacts.editing = false;
           Form.toggle();
           break;
         case 'cancel-add':
@@ -151,8 +199,8 @@ var App = {
   init: function() {
     this.cacheTemplates();
     this.bindEvents();
-    Form.init();
     Contacts.init();
+    Form.init();
   }
 };
 

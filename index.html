@@ -70,15 +70,15 @@
 
     <script type="text/x-handlebars-template" id="contact">
       {{#each contact}}
-      <div class="contact" id="{{id}}">
-        <h3>{{name}}</h3>
+      <div class="contact" data-id="{{id}}">
+        <h3 data-field="name">{{name}}</h3>
 
         <dl>
           <dt>Phone Number:</dt>
-          <dd>{{phone}}</dd>
+          <dd data-field="phone">{{phone}}</dd>
 
           <dt>Email:</dt>
-          <dd>{{email}}</dd>
+          <dd data-field="email">{{email}}</dd>
         </dl>
 
         <button id="edit">Edit</button>
