@@ -1,14 +1,13 @@
 var Contacts = {
   $section: $('#contacts'),
   id: '0',
-  list: [],
   currentContact: {},
   editing: false,
   add: function(contact) {
     contact.id = this.id;
     this.id = String(Number(this.id + 1));
     this.list.push(contact);
-    this.render(this.list)
+    this.render(this.list);
   },
   edit: function() {
     var $contactDiv = this.$section.find('[data-id="' + this.currentContact.id + '"]');
@@ -55,6 +54,7 @@ var Contacts = {
     });
 
     this.list.splice(index, 1);
+    localStorage.setItem('list', JSON.stringify(Contacts.list));
 
     if (this.list.length === 0) {
       this.render();
@@ -98,6 +98,7 @@ var Contacts = {
     });
   },
   init: function() {
+    this.list = JSON.parse(localStorage.getItem('list')) || [];
     this.bindEvents();
     this.render();
   }
@@ -175,6 +176,7 @@ var Form = {
         Contacts.add(data);
       }
 
+      localStorage.setItem('list', JSON.stringify(Contacts.list));
       this.toggle();
     } else {
       this.$formError.animate({
