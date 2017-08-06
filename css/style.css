@@ -172,9 +172,11 @@ footer {
 
 /* CONTACT */
 .contact {
+  position: relative;
   display: inline-block;
   vertical-align: top;
   min-width: 24%;
+  height: 200px;
   margin: 0 .5% 20px .5%;
   font-size: 14px;
 }
@@ -183,7 +185,7 @@ footer {
   display: block;
   content: "";
   min-width: 100%;
-  margin-top: 10px;
+  margin-top: 60px;
   border-bottom: 1px solid #dfdfdf;
 }
 
@@ -194,3 +196,34 @@ footer {
 
 .contact dt { font-weight: bold; }
 .contact dd { margin: 2px 0 10px 0; }
+
+.confirm { color: red; }
+
+.edit-delete,
+.yes-no {
+  position: absolute;
+  bottom: 0;
+}
+
+.yes-no { display: none; }
+.confirm { opacity: 0; }
+
+button.yes {
+  color: red;
+  border-color: red;
+}
+
+button.yes:hover {
+  color: white;
+  background: red;
+}
+
+button.no {
+  color: green;
+  border-color: green;
+}
+
+button.no:hover {
+  color: white;
+  background: green;
+}

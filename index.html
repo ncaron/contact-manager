@@ -41,7 +41,7 @@
 
                 <dt><label for="phone">Telephone Number:</label></dt><!--
                 --><dd>
-                  <input type="text" id="phone" placeholder="555-555-5555" pattern="[0-9()+\-]+" required>
+                  <input type="text" id="phone" placeholder="555-555-5555" pattern="[0-9()+\- ]+" required>
                   <span class="error"></span>
                 </dd>
               </dl>
@@ -81,8 +81,17 @@
           <dd data-field="email">{{email}}</dd>
         </dl>
 
-        <button data-button="edit">Edit</button>
-        <button data-button="delete">Delete</button>
+        <p class="confirm">Are you sure?</p>
+
+        <div class="edit-delete">
+          <button data-button="edit">Edit</button>
+          <button data-button="delete">Delete</button>
+        </div>
+
+        <div class="yes-no">
+          <button data-button="yes" class="yes">Yes</button>
+          <button data-button="no" class="no">No</button>
+        </div>
       </div>
       {{/each}}
     </script>
