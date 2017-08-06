@@ -2,6 +2,7 @@ var Contacts = {
   $section: $('#contacts'),
   id: '0',
   currentContact: {},
+  filteredList: [],
   editing: false,
   add: function(contact) {
     contact.id = this.id;
@@ -57,7 +58,7 @@ var Contacts = {
     localStorage.setItem('list', JSON.stringify(Contacts.list));
 
     if (this.list.length === 0) {
-      this.render();
+      this.render(this.list);
     }
   },
   resetConfirmation: function() {
@@ -68,13 +69,24 @@ var Contacts = {
     $('.edit-delete').fadeIn();
     $('.yes-no').fadeOut();
   },
-  render: function() {
+  filter: function() {
+    var search = $('#search').val().toLowerCase();
+
+    this.filteredList = this.list.filter(function(contact) {
+      return contact.name.toLowerCase().indexOf(search) >= 0 ||
+             contact.email.toLowerCase().indexOf(search) >= 0 ||
+             contact.phone.indexOf(search) >= 0;
+    });
+
+    this.render(this.filteredList);
+  },
+  render: function(list) {
     this.$section.html('');
 
-    if (this.list.length === 0) {
+    if (list.length === 0) {
       this.$section.html(App.errorTemplate({error: 'No Contacts.'}));
     } else {
-      this.$section.html(App.contactTemplate({contact: this.list}));
+      this.$section.html(App.contactTemplate({contact: list}));
     }
   },
   bindEvents: function() {
@@ -100,7 +112,7 @@ var Contacts = {
   init: function() {
     this.list = JSON.parse(localStorage.getItem('list')) || [];
     this.bindEvents();
-    this.render();
+    this.render(this.list);
   }
 };
 
@@ -247,6 +259,8 @@ var App = {
         Form.toggle();
       }
     });
+
+    $('#search').on('input', Contacts.filter.bind(Contacts));
   },
   init: function() {
     this.cacheTemplates();
