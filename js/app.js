@@ -45,7 +45,7 @@ var Contacts = {
     this.$section.on('click', 'button', function(e) {
       e.preventDefault();
 
-      var targetID = e.target.id;
+      var targetID = $(e.target).data('button');
       var currentContact = $(e.target.closest('.contact'));
 
       if (targetID === 'edit') {
@@ -180,7 +180,7 @@ var App = {
     $(document).on('click', 'button', function(e) {
       e.preventDefault();
 
-      var targetID = e.target.id;
+      var targetID = $(e.target).data('button');
 
       switch (targetID) {
         case 'add-contact':

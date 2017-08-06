@@ -16,7 +16,7 @@
     <div class="wrapper">
       <main>
         <section id="menu">
-          <button id="add-contact">Add Contact</button>
+          <button data-button="add-contact">Add Contact</button>
           <input type="text" placeholder="Search">
         </section>
 
@@ -48,8 +48,8 @@
             </fieldset>
 
             <div class="btn-group">
-              <button type="submit" id="submit">Submit</button><!--
-              --><button type="reset" id="cancel-add">Cancel</button>
+              <button type="submit" data-button="submit">Submit</button><!--
+              --><button type="reset" data-button="cancel-add">Cancel</button>
             </div>
           </form>
         </section>
@@ -81,8 +81,8 @@
           <dd data-field="email">{{email}}</dd>
         </dl>
 
-        <button id="edit">Edit</button>
-        <button id="delete">Delete</button>
+        <button data-button="edit">Edit</button>
+        <button data-button="delete">Delete</button>
       </div>
       {{/each}}
     </script>
