@@ -20,6 +20,10 @@
           <input type="text" id="search" placeholder="Search">
         </section>
 
+        <!--
+          Contains the form
+          Will appear when 'Add Contact' or 'Edit' is clicked
+        -->
         <section id="add-new">
           <h2>Create Contact</h2>
 
@@ -54,6 +58,7 @@
           </form>
         </section>
 
+        <!-- Will be populated with the contacts using JavaScript -->
         <section id="contacts"></section>
       </main>
 
@@ -62,12 +67,20 @@
       </footer>
     </div>
 
+    <!--
+      Emtpy list template
+      Will display when there are no contacts in the list
+    -->
     <script type="text/x-handlebars-template" id="contact-error">
       <div class="no-contacts">
         <p>{{error}}</p>
       </div>
     </script>
 
+    <!--
+      Contact template
+      Will use the contact data and populate every contact in the #contacts section
+    -->
     <script type="text/x-handlebars-template" id="contact">
       {{#each contact}}
       <div class="contact" data-id="{{id}}">

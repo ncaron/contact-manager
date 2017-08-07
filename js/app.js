@@ -3,14 +3,25 @@ var Contacts = {
   currentContact: {},
   filteredList: [],
   editing: false,
+
+  // Will add a contact to the array of contacts(list) using the data provided
   add: function(contact) {
     this.list.push(contact);
     this.render(this.list);
   },
+
+  /*
+  * Finds the div of the contact being edited using the contact's ID
+  * Gets the index of the contact being edited using getIndex()
+  * Gets the form's data. Getting the data assigns a new ID to the contact
+  * Replaces the new ID with the old one to keep it consistent
+  * Replaces the old contact object in the array of contacts(list) with the new one
+  * Edits the contact div data with the new data
+  */
   edit: function() {
     var $contactDiv = this.$section.find('[data-id="' + this.currentContact.id + '"]');
-    var editedContact = Form.getData();
     var index = this.getIndex(this.currentContact.id);
+    var editedContact = Form.getData();
     editedContact.id = this.currentContact.id;
     this.list[index] = editedContact;
 
@@ -18,6 +29,11 @@ var Contacts = {
     $contactDiv.find('.contact-email').text(editedContact.email);
     $contactDiv.find('.contact-phone').text(editedContact.phone);
   },
+
+  /*
+  * Sets the data of the current contact being edited
+  * Sets editing to true so that when submit is clicked, the appropriate behavior will happen
+  */
   handleEdit: function($currentContact) {
     this.currentContact.id = String($currentContact.data('id'));
     this.currentContact.name = $currentContact.find('.contact-name').text();
@@ -29,6 +45,8 @@ var Contacts = {
     Form.setData(this.currentContact);
     this.editing = true;
   },
+
+  // Shows the delete confirmation while hiding the 'Edit' and 'Delete' buttons
   diplayConfirmation: function($currentContact) {
     this.resetConfirmation();
 
@@ -39,11 +57,21 @@ var Contacts = {
     $currentContact.find('.edit-delete').fadeOut();
     $currentContact.find('.yes-no').fadeIn();
   },
+
+  // Using the id of the contact, find its position in the array of contacts(list)
   getIndex: function(id) {
     return this.list.indexOf(this.list.find(function(contact) {
       return contact.id === id;
     }));
   },
+
+  /*
+  * Find the index of the contact to be deleted using getIndex()
+  * fadeOut the contact that will be deleted
+  * Splice the array of contacts(list) to remove the deleted contact
+  * Updated the localStorage list of contacts
+  * Re-render the page if the array of contacts is empty, this will display the error message.
+  */
   delete: function($currentContact) {
     var index = this.getIndex(String($currentContact.data('id')));
 
@@ -58,6 +86,8 @@ var Contacts = {
       this.render(this.list);
     }
   },
+
+  // Removes the delete confirmation while displaying the 'Edit' and 'Delete' buttons
   resetConfirmation: function() {
     $('.confirm').animate({
       opacity: 0,
@@ -66,6 +96,8 @@ var Contacts = {
     $('.edit-delete').fadeIn();
     $('.yes-no').fadeOut();
   },
+
+  // Checks the search input VS contact data and re-renders the page based on the result
   filter: function() {
     var search = $('#search').val().toLowerCase();
 
@@ -77,6 +109,8 @@ var Contacts = {
 
     this.render(this.filteredList);
   },
+
+  // Displays an error message if there's no contacts found else display the list of contacts
   render: function(list) {
     this.$section.html('');
 
@@ -106,6 +140,8 @@ var Contacts = {
       }
     });
   },
+
+  // Initializes the Contacts object and sets the list using localStorage
   init: function() {
     this.list = JSON.parse(localStorage.getItem('list')) || [];
     this.bindEvents();
@@ -122,6 +158,11 @@ var Form = {
     Contacts.$section.slideToggle();
     this.$form.trigger('reset');
   },
+
+  /*
+  * Generates a random 10 digit id for the contact, id will be a String
+  * Checks if the random id already exists, recursively recall the function if it does
+  */
   generateID: function() {
     var id = '';
     var ids;
@@ -141,6 +182,8 @@ var Form = {
 
     return id;
   },
+
+  // Gets the forms data and returns an object representing the contact
   getData: function() {
     return {
       id: this.generateID(),
@@ -149,11 +192,19 @@ var Form = {
       phone: $('#phone').val(),
     };
   },
+
+  // When the 'Edit' button is clicked, sets the form's data to match the contact to be edited
   setData: function(currentContact) {
     $('#name').val(currentContact.name);
     $('#email').val(currentContact.email);
     $('#phone').val(currentContact.phone);
   },
+
+  /*
+  * Checks if the input to be checked is valid, adds 'invalid' class if not valid and return false
+  * Based on what is wrong(required or invalid format), displays the appropriate error message
+  * Remove the 'invalid' class if valid and return true
+  */
   validateInput: function(input) {
     var $errorBox = $(input).parent().find('.error');
     var inputID = input.id;
@@ -183,6 +234,8 @@ var Form = {
       return true;
     }
   },
+
+  // Loops through all form inputs and sets 'isValid' to false if any of them are not valid
   validateForm: function() {
     var self = this;
     var isValid = true;
@@ -195,6 +248,12 @@ var Form = {
 
     return isValid;
   },
+
+  /*
+  * If the form is valid, checks 'editing' property of the Contacts object to get the appropriate behavior
+  * Update localStorage with the new contact data
+  * Displays the form error message if the form is not valid
+  */
   handleSubmit: function() {
     var data = this.getData();
 
@@ -213,6 +272,8 @@ var Form = {
       }, 400);
     }
   },
+
+  // Resets all form data, error message and 'invalid' classes
   resetForm: function() {
     this.$form.find('input').removeClass('invalid');
     this.$form.find('.error').text('');
@@ -221,6 +282,12 @@ var Form = {
       opacity: 0,
     }, 400);
   },
+
+  /*
+  * Prevents invalid keys from being entered by the user
+  * For name, prevents keys that are not letters, apostrophes or spaces
+  * For phone, prevents the keys that are not numbers, parentheses, pluses, dashes or spaces
+  */
   preventInvalidKeys: function(e) {
     var target = e.target;
     var key = e.key;
