@@ -319,10 +319,18 @@ var Form = {
   },
   bindEvents: function() {
     this.$form.on('input', function(e) {
+      console.log(e);
       this.validateInput(e.target);
     }.bind(this));
 
-    this.$form.on('keypress', 'input', this.preventInvalidInputs.bind(this));
+    this.$form.on('keypress', 'input', function(e) {
+      if (e.key === 'Enter') {
+        $('.submit').trigger('click');
+      } else {
+        this.preventInvalidInputs(e);
+      }
+    }.bind(this));
+
     this.$form.on('reset', this.resetForm.bind(this));
 
     this.$form.on('click', 'button', function(e) {
@@ -370,6 +378,12 @@ var App = {
     });
 
     $('#search').on('input', Contacts.filter.bind(Contacts));
+
+    $('#search').on('keypress', function(e) {
+      if (e.key === 'Enter') {
+        $('#search').blur();
+      }
+    })
   },
 
   /*
