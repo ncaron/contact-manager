@@ -85,6 +85,16 @@ main { padding-bottom: 150px; }
 
 .add-contact { margin-right: 150px; }
 
+#search:disabled,
+.reset {
+  cursor: not-allowed;
+}
+
+.reset:disabled {
+  background: inherit;
+  color: #654b8e;
+}
+
 
 /* FOOTER */
 footer {

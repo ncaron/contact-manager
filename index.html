@@ -86,11 +86,17 @@
     </script>
 
     <!--
-      Contact template
-      Will use the contact data and populate every contact in the #contacts section
+      Contact list template
+      Will use the contact data and populate every contact in the #contacts section with the contact partial
     -->
-    <script type="text/x-handlebars-template" id="contact">
+    <script type="text/x-handlebars-template" id="contact-list">
       {{#each contact}}
+      {{> contact-template}}
+      {{/each}}
+    </script>
+
+    <!-- Contact template -->
+    <script type="text/x-handlebars-template" id="contact-template">
       <div class="contact" data-id="{{id}}">
         <h3 class="contact-name">{{name}}</h3>
 
@@ -104,7 +110,7 @@
           {{#if tags}}
           <dt>Tags:</dt>
           <dd>
-            {{#each tags}}
+            {{#each this.tags}}
             <span class="tag">{{this}}</span>
             {{/each}}
           </dd>
@@ -123,7 +129,6 @@
           <button class="no">No</button>
         </div>
       </div>
-      {{/each}}
     </script>
 
     <script src="js/app.js"></script>

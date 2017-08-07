@@ -1,29 +1,36 @@
 var Contacts = {
   $section: $('#contacts'),
   currentContact: {},
-  filteredList: [],
   editing: false,
 
   // Will add a contact to the array of contacts(list) using the data provided
   add: function(contact) {
     this.list.push(contact);
-    this.render(this.list);
+    this.$section.append(App.contactTemplate({
+      name: contact.name,
+      email: contact.email,
+      phone: contact.phone,
+      tags: contact.tags,
+    }));
+    $('.no-contacts').hide();
+
+    if (this.list.length > 0) {
+      App.toggleSearch(false, 'Search');
+    }
   },
 
   /*
-  * Finds the div of the contact being edited using the contact's ID
   * Gets the index of the contact being edited using getIndex()
   * Gets the form's data. Getting the data assigns a new ID to the contact
   * Replaces the new ID with the old one to keep it consistent
   * Replaces the old contact object in the array of contacts(list) with the new one
   */
   edit: function() {
-    var $contactDiv = this.$section.find('[data-id="' + this.currentContact.id + '"]');
     var index = this.getIndex(this.currentContact.id);
     var editedContact = Form.getData();
     editedContact.id = this.currentContact.id;
     this.list[index] = editedContact;
-    this.render(this.list);
+    this.render();
   },
 
   /*
@@ -46,7 +53,7 @@ var Contacts = {
   },
 
   // Shows the delete confirmation while hiding the 'Edit' and 'Delete' buttons
-  diplayConfirmation: function($currentContact) {
+  displayConfirmation: function($currentContact) {
     this.resetConfirmation();
 
     $currentContact.find('.confirm').animate({
@@ -68,21 +75,26 @@ var Contacts = {
   * Find the index of the contact to be deleted using getIndex()
   * fadeOut the contact that will be deleted
   * Splice the array of contacts(list) to remove the deleted contact
-  * Updated the localStorage list of contacts
-  * Re-render the page if the array of contacts is empty, this will display the error message.
+  * Updates the localStorage list of contacts
+  * Displays an error if no more contacts are left in the list
   */
   delete: function($currentContact) {
     var index = this.getIndex(String($currentContact.data('id')));
 
     $currentContact.fadeOut(400, function() {
       $currentContact.remove();
-    });
+
+      if (this.list.length !== 0) {
+        this.filter();
+      }
+    }.bind(this));
 
     this.list.splice(index, 1);
     localStorage.setItem('list', JSON.stringify(Contacts.list));
 
     if (this.list.length === 0) {
-      this.render(this.list);
+      $('.no-contacts').html('No Contacts').fadeIn(400);
+      App.toggleSearch(true, 'No contacts to search');
     }
   },
 
@@ -102,28 +114,40 @@ var Contacts = {
     this.filter();
   },
 
-  // Checks the search input VS contact data and re-renders the page based on the result
+  /*
+  * Checks the search input VS contact data and toggles the visibilty based on the result
+  * Displays an error message if no matches found
+  */
   filter: function() {
     var search = $('#search').val().toLowerCase();
 
-    this.filteredList = this.list.filter(function(contact) {
-      return contact.name.toLowerCase().indexOf(search) >= 0 ||
-             contact.email.toLowerCase().indexOf(search) >= 0 ||
-             contact.phone.indexOf(search) >= 0 ||
-             contact.tags.indexOf(search) >= 0;
+    $('.contact').each(function() {
+      $(this).toggle($(this).find('.contact-name').text().toLowerCase().indexOf(search) >= 0 ||
+                     $(this).find('.contact-email').text().toLowerCase().indexOf(search) >= 0 ||
+                     $(this).find('.contact-phone').text().indexOf(search) >= 0 ||
+                     $(this).find('.tag').text().indexOf(search) >= 0);
     });
 
-    this.render(this.filteredList);
+    if ($('.contact:visible').length === 0) {
+      this.$section.find('.no-contacts').html('No Contacts starting with: ' + search);
+      this.$section.find('.no-contacts').show();
+    } else {
+      this.$section.find('.no-contacts').hide();
+    }
   },
 
-  // Displays an error message if there's no contacts found else display the list of contacts
-  render: function(list) {
+  /*
+  * Renders the 'no-contacts' error div, hides it if the list is not empty
+  * Renders the list of contacts
+  */
+  render: function() {
     this.$section.html('');
 
-    if (list.length === 0) {
-      this.$section.html(App.errorTemplate({error: 'No Contacts.'}));
-    } else {
-      this.$section.html(App.contactTemplate({contact: list}));
+    this.$section.append(App.errorTemplate({error: 'No Contacts.'}));
+    this.$section.append(App.contactListTemplate({contact: this.list}));
+
+    if (this.list.length !== 0) {
+      this.$section.find('.no-contacts').hide();
     }
   },
   bindEvents: function() {
@@ -138,7 +162,7 @@ var Contacts = {
       if ($target.hasClass('edit-contact')) {
         self.handleEdit($currentContact);
       } else if ($target.hasClass('delete-contact')) {
-        self.diplayConfirmation($currentContact);
+        self.displayConfirmation($currentContact);
       } else if ($target.hasClass('no')) {
         self.resetConfirmation();
       } else if ($target.hasClass('yes')) {
@@ -153,7 +177,11 @@ var Contacts = {
   init: function() {
     this.list = JSON.parse(localStorage.getItem('list')) || [];
     this.bindEvents();
-    this.render(this.list);
+    this.render();
+
+    if (this.list.length === 0) {
+      App.toggleSearch(true, 'No contacts to search');
+    }
   }
 };
 
@@ -319,7 +347,6 @@ var Form = {
   },
   bindEvents: function() {
     this.$form.on('input', function(e) {
-      console.log(e);
       this.validateInput(e.target);
     }.bind(this));
 
@@ -353,10 +380,23 @@ var Form = {
 var App = {
   cacheTemplates: function() {
     var errorTemplate = $('#contact-error').remove().html();
-    var contactTemplate = $('#contact').remove().html();
+    var contactListTemplate = $('#contact-list').remove().html();
+    var contactTemplate = $('#contact-template').remove().html();
+    var contactTemplatePartial = Handlebars.registerPartial('contact-template', contactTemplate);
 
     this.errorTemplate = Handlebars.compile(errorTemplate);
     this.contactTemplate = Handlebars.compile(contactTemplate);
+    this.contactListTemplate = Handlebars.compile(contactListTemplate);
+  },
+
+  /*
+  * Disables or enables the search bar and reset button based on the value passed in
+  */
+  toggleSearch: function(disabled, message) {
+    $('#search').val('');
+    $('#search').prop('disabled', disabled);
+    $('#search').prop('placeholder', message);
+    $('.reset').prop('disabled', disabled)
   },
   bindEvents: function() {
     $(document).on('click', function(e) {
