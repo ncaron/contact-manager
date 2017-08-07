@@ -1,12 +1,9 @@
 var Contacts = {
   $section: $('#contacts'),
-  id: '0',
   currentContact: {},
   filteredList: [],
   editing: false,
   add: function(contact) {
-    contact.id = this.id;
-    this.id = String(Number(this.id + 1));
     this.list.push(contact);
     this.render(this.list);
   },
@@ -125,8 +122,28 @@ var Form = {
     Contacts.$section.slideToggle();
     this.$form.trigger('reset');
   },
+  generateID: function() {
+    var id = '';
+    var ids;
+    var i;
+
+    for (i = 0; i < 10; i += 1) {
+      id += String(Math.floor(Math.random() * 9));
+    }
+
+    ids = Contacts.list.map(function(contact) {
+      return contact.id;
+    });
+
+    if (ids.indexOf(id) >= 0) {
+      return this.generateID();
+    }
+
+    return id;
+  },
   getData: function() {
     return {
+      id: this.generateID(),
       name: $('#name').val(),
       email: $('#email').val(),
       phone: $('#phone').val(),
