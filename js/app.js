@@ -352,9 +352,11 @@ var App = {
   },
   bindEvents: function() {
     $(document).on('click', function(e) {
-      e.preventDefault();
-
       var $target = $(e.target);
+
+      if (e.target.id !== 'github') {
+        e.preventDefault();
+      }
 
       if (e.target.tagName !== 'BUTTON') {
         Contacts.resetConfirmation();
