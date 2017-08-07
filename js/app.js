@@ -14,15 +14,15 @@ var Contacts = {
     editedContact.id = this.currentContact.id;
     this.list[index] = editedContact;
 
-    $contactDiv.find('[data-field="name"]').text(editedContact.name);
-    $contactDiv.find('[data-field="email"]').text(editedContact.email);
-    $contactDiv.find('[data-field="phone"]').text(editedContact.phone);
+    $contactDiv.find('.contact-name').text(editedContact.name);
+    $contactDiv.find('.contact-email').text(editedContact.email);
+    $contactDiv.find('.contact-phone').text(editedContact.phone);
   },
   handleEdit: function($currentContact) {
     this.currentContact.id = String($currentContact.data('id'));
-    this.currentContact.name = $currentContact.find('[data-field="name"]').text();
-    this.currentContact.email = $currentContact.find('[data-field="email"]').text();
-    this.currentContact.phone = $currentContact.find('[data-field="phone"]').text();
+    this.currentContact.name = $currentContact.find('.contact-name').text();
+    this.currentContact.email = $currentContact.find('.contact-email').text();
+    this.currentContact.phone = $currentContact.find('.contact-phone').text();
 
     this.resetConfirmation();
     Form.toggle();
@@ -92,16 +92,16 @@ var Contacts = {
     this.$section.on('click', 'button', function(e) {
       e.preventDefault();
 
-      var targetID = $(e.target).data('button');
+      var $target = $(e.target);
       var $currentContact = $(e.target.closest('.contact'));
 
-      if (targetID === 'edit') {
+      if ($target.hasClass('edit-contact')) {
         self.handleEdit($currentContact);
-      } else if (targetID === 'delete') {
+      } else if ($target.hasClass('delete-contact')) {
         self.diplayConfirmation($currentContact);
-      } else if (targetID === 'no') {
+      } else if ($target.hasClass('no')) {
         self.resetConfirmation();
-      } else if (targetID === 'yes') {
+      } else if ($target.hasClass('yes')) {
         self.delete($currentContact);
       }
     });
@@ -241,11 +241,11 @@ var Form = {
     this.$form.on('click', 'button', function(e) {
       e.preventDefault();
 
-      var targetID = $(e.target).data('button');
+      var $target = $(e.target);
 
-      if (targetID === 'submit') {
+      if ($target.hasClass('submit')) {
         this.handleSubmit();
-      } else if (targetID === 'cancel-add') {
+      } else if ($target.hasClass('cancel-add')) {
         this.toggle();
       }
     }.bind(this));
@@ -267,11 +267,11 @@ var App = {
     $(document).on('click', function(e) {
       e.preventDefault();
 
-      var targetID = $(e.target).data('button');
+      var $target = $(e.target);
 
       if (e.target.tagName !== 'BUTTON') {
         Contacts.resetConfirmation();
-      } else if (targetID === 'add-contact') {
+      } else if ($target.hasClass('add-contact')) {
         Contacts.editing = false;
         Form.toggle();
       }

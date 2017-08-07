@@ -16,7 +16,7 @@
     <div class="wrapper">
       <main>
         <section id="menu">
-          <button data-button="add-contact">Add Contact</button>
+          <button class="add-contact">Add Contact</button>
           <input type="text" id="search" placeholder="Search">
         </section>
 
@@ -48,8 +48,8 @@
             </fieldset>
 
             <div class="btn-group">
-              <button type="submit" data-button="submit">Submit</button><!--
-              --><button type="reset" data-button="cancel-add">Cancel</button>
+              <button type="submit" class="submit">Submit</button><!--
+              --><button type="reset" class="cancel-add">Cancel</button>
             </div>
           </form>
         </section>
@@ -71,26 +71,26 @@
     <script type="text/x-handlebars-template" id="contact">
       {{#each contact}}
       <div class="contact" data-id="{{id}}">
-        <h3 data-field="name">{{name}}</h3>
+        <h3 class="contact-name">{{name}}</h3>
 
         <dl>
           <dt>Phone Number:</dt>
-          <dd data-field="phone">{{phone}}</dd>
+          <dd class="contact-phone">{{phone}}</dd>
 
           <dt>Email:</dt>
-          <dd data-field="email">{{email}}</dd>
+          <dd class="contact-email">{{email}}</dd>
         </dl>
 
         <p class="confirm">Are you sure?</p>
 
         <div class="edit-delete">
-          <button data-button="edit">Edit</button>
-          <button data-button="delete">Delete</button>
+          <button class="edit-contact">Edit</button>
+          <button class="delete-contact">Delete</button>
         </div>
 
         <div class="yes-no">
-          <button data-button="yes" class="yes">Yes</button>
-          <button data-button="no" class="no">No</button>
+          <button class="yes">Yes</button>
+          <button class="no">No</button>
         </div>
       </div>
       {{/each}}
