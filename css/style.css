@@ -83,12 +83,12 @@ main { padding-bottom: 150px; }
   z-index: 1;
 }
 
-#menu button { margin-right: 150px; }
+.add-contact { margin-right: 150px; }
 
 
 /* FOOTER */
 footer {
-  padding-top: 20px;
+  padding: 20px 0 50px 0;
   text-align: center;
   border-top: 1px solid #dfdfdf;
 }
@@ -245,3 +245,81 @@ button.no:hover {
 }
 
 .tag:hover { background: #99fff6; }
+
+
+/* Contacts are now 3 per row */
+@media (max-width: 1000px) {
+  #menu {
+    width: 100%;
+    border-right: none;
+    border-left: none;
+    border-radius: 0;
+  }
+
+  .contact {
+    width: 29%;
+    margin-left: 2%;
+    margin-right: 2%;
+  }
+}
+
+
+/* Contacts are now 3 per row */
+@media (max-width: 768px) {
+  .add-contact {
+    display: block;
+    margin: 0 auto 10px auto;
+  }
+
+  .contact { width: 46%; }
+}
+
+
+/*
+* Contacts are now 2 per row
+* Form looks better for mobile
+*/
+@media (max-width: 600px) {
+  .contact {
+    width: 90%;
+    left: 5%;
+    text-align: center;
+  }
+
+  .contact:last-child { border: none; }
+  .contact dd { margin: 5px 0 20px 0; }
+
+  .edit-delete,
+  .yes-no {
+    left: 50%;
+    margin-left: -50px;
+  }
+
+  .confirm {
+    right: 0;
+    left: 0;
+  }
+
+  main { padding-bottom: 75px; }
+  #add-new { padding-top: 10px; }
+  #add-new h2 { margin-bottom: 10px; }
+
+  #add-new form {
+    width: 90%;
+    margin: 0 auto;
+  }
+
+  #add-new dt {
+    float: none;
+    width: 100%;
+    padding: 10px 0;
+    text-align: left;
+  }
+
+  #add-new dd { margin: 0 0 10px 0; }
+
+  .btn-group {
+    margin-top: 10px;
+    margin-left: 0;
+  }
+}
