@@ -175,18 +175,18 @@ footer {
   position: relative;
   display: inline-block;
   vertical-align: top;
-  min-width: 24%;
-  height: 200px;
+  width: 24%;
+  height: 300px;
   margin: 0 .5% 20px .5%;
   font-size: 14px;
+  border-bottom: 1px solid #dfdfdf;
 }
 
 .contact::after {
   display: block;
   content: "";
   min-width: 100%;
-  margin-top: 60px;
-  border-bottom: 1px solid #dfdfdf;
+  margin-top: 70px;
 }
 
 .contact h3 {
@@ -201,11 +201,16 @@ footer {
 .edit-delete,
 .yes-no {
   position: absolute;
-  bottom: 0;
+  bottom: 10px;
 }
 
 .yes-no { display: none; }
-.confirm { opacity: 0; }
+
+.confirm {
+  position: absolute;
+  bottom: 60px;
+  opacity: 0;
+}
 
 button.yes {
   color: red;
@@ -226,3 +231,17 @@ button.no:hover {
   color: white;
   background: green;
 }
+
+
+/* TAGS */
+.tag {
+  display: inline-block;
+  background: #d0f2ef;
+  padding: 3px;
+  margin: 2px 1px;
+  border: 1px solid #99fff6;
+  cursor: pointer;
+  transition: background .25s ease-in;
+}
+
+.tag:hover { background: #99fff6; }

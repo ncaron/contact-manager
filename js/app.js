@@ -16,7 +16,6 @@ var Contacts = {
   * Gets the form's data. Getting the data assigns a new ID to the contact
   * Replaces the new ID with the old one to keep it consistent
   * Replaces the old contact object in the array of contacts(list) with the new one
-  * Edits the contact div data with the new data
   */
   edit: function() {
     var $contactDiv = this.$section.find('[data-id="' + this.currentContact.id + '"]');
@@ -24,10 +23,7 @@ var Contacts = {
     var editedContact = Form.getData();
     editedContact.id = this.currentContact.id;
     this.list[index] = editedContact;
-
-    $contactDiv.find('.contact-name').text(editedContact.name);
-    $contactDiv.find('.contact-email').text(editedContact.email);
-    $contactDiv.find('.contact-phone').text(editedContact.phone);
+    this.render(this.list);
   },
 
   /*
@@ -39,6 +35,9 @@ var Contacts = {
     this.currentContact.name = $currentContact.find('.contact-name').text();
     this.currentContact.email = $currentContact.find('.contact-email').text();
     this.currentContact.phone = $currentContact.find('.contact-phone').text();
+    this.currentContact.tags = $.map($currentContact.find('.tag'), function(tag) {
+      return $(tag).text();
+    }).join(' ');
 
     this.resetConfirmation();
     Form.toggle();
@@ -97,6 +96,12 @@ var Contacts = {
     $('.yes-no').fadeOut();
   },
 
+  // Sets the search box to the value of the clicked tag
+  handleTagClick: function(tag) {
+    $('#search').val(tag);
+    this.filter();
+  },
+
   // Checks the search input VS contact data and re-renders the page based on the result
   filter: function() {
     var search = $('#search').val().toLowerCase();
@@ -104,7 +109,8 @@ var Contacts = {
     this.filteredList = this.list.filter(function(contact) {
       return contact.name.toLowerCase().indexOf(search) >= 0 ||
              contact.email.toLowerCase().indexOf(search) >= 0 ||
-             contact.phone.indexOf(search) >= 0;
+             contact.phone.indexOf(search) >= 0 ||
+             contact.tags.indexOf(search) >= 0;
     });
 
     this.render(this.filteredList);
@@ -123,7 +129,7 @@ var Contacts = {
   bindEvents: function() {
     var self = this;
 
-    this.$section.on('click', 'button', function(e) {
+    this.$section.on('click', '.contact', function(e) {
       e.preventDefault();
 
       var $target = $(e.target);
@@ -137,6 +143,8 @@ var Contacts = {
         self.resetConfirmation();
       } else if ($target.hasClass('yes')) {
         self.delete($currentContact);
+      } else if ($target.hasClass('tag')) {
+        self.handleTagClick($target.text());
       }
     });
   },
@@ -190,6 +198,9 @@ var Form = {
       name: $('#name').val(),
       email: $('#email').val(),
       phone: $('#phone').val(),
+      tags: $('#tags').val().trim().split(' ').map(function(tag) {
+        return tag.toLowerCase();
+      }),
     };
   },
 
@@ -198,6 +209,7 @@ var Form = {
     $('#name').val(currentContact.name);
     $('#email').val(currentContact.email);
     $('#phone').val(currentContact.phone);
+    $('#tags').val(currentContact.tags);
   },
 
   /*
@@ -208,6 +220,7 @@ var Form = {
   validateInput: function(input) {
     var $errorBox = $(input).parent().find('.error');
     var inputID = input.id;
+    var inputLength = input.value.split(' ').length;
     var validity = input.validity;
     var error = '';
 
@@ -227,6 +240,10 @@ var Form = {
       }
 
       $errorBox.text(error);
+      return false;
+    } else if (inputID === 'tags' && inputLength > 5) {
+      input.classList.add('invalid');
+      $errorBox.text('Please only use 5 tags or less.');
       return false;
     } else {
       input.classList.remove('invalid');
@@ -287,13 +304,16 @@ var Form = {
   * Prevents invalid keys from being entered by the user
   * For name, prevents keys that are not letters, apostrophes or spaces
   * For phone, prevents the keys that are not numbers, parentheses, pluses, dashes or spaces
+  * Also limits the tags to 5
   */
-  preventInvalidKeys: function(e) {
+  preventInvalidInputs: function(e) {
     var target = e.target;
     var key = e.key;
+    var wordCount = target.value.trim().split(' ').length;
 
     if (target.id === 'name' && !key.match(/[a-z' ]/i) ||
-        target.id === 'phone' && !key.match(/[0-9()+\- ]/)) {
+        target.id === 'phone' && !key.match(/[0-9()+\- ]/) ||
+        target.id === 'tags' && wordCount >= 5 && key === ' ') {
       e.preventDefault();
     }
   },
@@ -302,7 +322,7 @@ var Form = {
       this.validateInput(e.target);
     }.bind(this));
 
-    this.$form.on('keypress', 'input', this.preventInvalidKeys.bind(this));
+    this.$form.on('keypress', 'input', this.preventInvalidInputs.bind(this));
     this.$form.on('reset', this.resetForm.bind(this));
 
     this.$form.on('click', 'button', function(e) {
@@ -341,12 +361,26 @@ var App = {
       } else if ($target.hasClass('add-contact')) {
         Contacts.editing = false;
         Form.toggle();
+      } else if ($target.hasClass('reset')) {
+        $('#search').val('');
+        Contacts.filter();
       }
     });
 
     $('#search').on('input', Contacts.filter.bind(Contacts));
   },
+
+  /*
+  * Initializes the whole app
+  * Registers a custom 'if' helper to check if tags are present
+  */
   init: function() {
+    Handlebars.registerHelper('if', function(tags, options) {
+      if (tags.join(' ').length > 0) {
+        return options.fn(this)
+      }
+    });
+
     this.cacheTemplates();
     this.bindEvents();
     Contacts.init();
