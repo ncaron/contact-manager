@@ -392,7 +392,7 @@ var App = {
     $('#search').val('');
     $('#search').prop('disabled', disabled);
     $('#search').prop('placeholder', message);
-    $('.reset').prop('disabled', disabled)
+    $('.reset').prop('disabled', disabled);
   },
   bindEvents: function() {
     $(document).on('click', function(e) {

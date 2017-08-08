@@ -86,7 +86,7 @@ main { padding-bottom: 150px; }
 .add-contact { margin-right: 150px; }
 
 #search:disabled,
-.reset {
+.reset:disabled {
   cursor: not-allowed;
 }
 
