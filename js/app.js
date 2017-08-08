@@ -34,21 +34,29 @@ var Contacts = {
       return contact.id === contactID;
     }.bind(this))[0];
 
-    this.resetConfirmation();
+    this.hideVisibleConfirmation();
     Form.toggle();
     Form.setData(this.currentContact);
     this.editing = true;
   },
-
-  // Shows the delete confirmation while hiding the 'Edit' and 'Delete' buttons
-  displayConfirmation: function($currentContact) {
-    this.resetConfirmation();
-
+  confirmDeletion: function($currentContact) {
+    this.hideVisibleConfirmation();
+    this.hideEditAndDeleteButtons($currentContact);
+    this.showDeleteConfirmation($currentContact);
+  },
+  hideVisibleConfirmation: function() {
+    $('.confirm').animate({
+      opacity: 0,
+    }, 400);
+  },
+  hideEditAndDeleteButtons: function($currentContact) {
+    $currentContact.find('.edit-delete').fadeOut();
+  },
+  showDeleteConfirmation: function($currentContact) {
     $currentContact.find('.confirm').animate({
       opacity: 1,
     }, 400);
 
-    $currentContact.find('.edit-delete').fadeOut();
     $currentContact.find('.yes-no').fadeIn();
   },
 
@@ -87,7 +95,7 @@ var Contacts = {
   },
 
   // Removes the delete confirmation while displaying the 'Edit' and 'Delete' buttons
-  resetConfirmation: function() {
+  hideVisibleConfirmation: function() {
     $('.confirm').animate({
       opacity: 0,
     }, 100);
@@ -150,9 +158,9 @@ var Contacts = {
       if ($target.hasClass('edit-contact')) {
         self.handleEdit($currentContact);
       } else if ($target.hasClass('delete-contact')) {
-        self.displayConfirmation($currentContact);
+        self.confirmDeletion($currentContact);
       } else if ($target.hasClass('no')) {
-        self.resetConfirmation();
+        self.hideVisibleConfirmation();
       } else if ($target.hasClass('yes')) {
         self.delete($currentContact);
       } else if ($target.hasClass('tag')) {
@@ -395,7 +403,7 @@ var App = {
       }
 
       if (e.target.tagName !== 'BUTTON') {
-        Contacts.resetConfirmation();
+        Contacts.hideVisibleConfirmation();
       } else if ($target.hasClass('add-contact')) {
         Contacts.editing = false;
         Form.toggle();
