@@ -47,7 +47,9 @@ var Contacts = {
   hideVisibleConfirmation: function() {
     $('.confirm').animate({
       opacity: 0,
-    }, 400);
+    }, 100);
+    $('.edit-delete').fadeIn();
+    $('.yes-no').fadeOut();
   },
   hideEditAndDeleteButtons: function($currentContact) {
     $currentContact.find('.edit-delete').fadeOut();
@@ -59,24 +61,23 @@ var Contacts = {
 
     $currentContact.find('.yes-no').fadeIn();
   },
-
-  // Using the id of the contact, find its position in the array of contacts(list)
   getIndex: function(id) {
     return this.list.indexOf(this.list.find(function(contact) {
       return contact.id === id;
     }));
   },
-
-  /*
-  * Find the index of the contact to be deleted using getIndex()
-  * fadeOut the contact that will be deleted
-  * Splice the array of contacts(list) to remove the deleted contact
-  * Updates the localStorage list of contacts
-  * Displays an error if no more contacts are left in the list
-  */
   delete: function($currentContact) {
     var index = this.getIndex(String($currentContact.data('id')));
 
+    this.removeContactFromUI($currentContact);
+    this.removeContactFromList($currentContact);
+
+    if (this.list.length === 0) {
+      $('.no-contacts').html('No Contacts').fadeIn(400);
+      App.toggleSearch(true, 'No contacts to search');
+    }
+  },
+  removeContactFromUI: function($currentContact) {
     $currentContact.fadeOut(400, function() {
       $currentContact.remove();
 
@@ -84,24 +85,12 @@ var Contacts = {
         this.filter();
       }
     }.bind(this));
+  },
+  removeContactFromList: function($currentContact) {
+    var index = this.getIndex(String($currentContact.data('id')));
 
     this.list.splice(index, 1);
     localStorage.setItem('list', JSON.stringify(Contacts.list));
-
-    if (this.list.length === 0) {
-      $('.no-contacts').html('No Contacts').fadeIn(400);
-      App.toggleSearch(true, 'No contacts to search');
-    }
-  },
-
-  // Removes the delete confirmation while displaying the 'Edit' and 'Delete' buttons
-  hideVisibleConfirmation: function() {
-    $('.confirm').animate({
-      opacity: 0,
-    }, 100);
-
-    $('.edit-delete').fadeIn();
-    $('.yes-no').fadeOut();
   },
 
   // Sets the search box to the value of the clicked tag
@@ -111,20 +100,25 @@ var Contacts = {
   },
 
   /*
-  * Checks the search input VS contact data and toggles the visibilty based on the result
+  * Filters the contacts and toggles visibility based on search input
   * Displays an error message if no matches found
   */
   filter: function() {
     var search = $('#search').val().toLowerCase();
+    var matchedIDs = this.list.filter(function(contact) {
+      if (contact.name.toLowerCase().indexOf(search) >= 0 ||
+          contact.email.toLowerCase().indexOf(search) >= 0 ||
+          contact.phone.indexOf(search) >= 0 ||
+          contact.tags.indexOf(search) >= 0) {
+        return contact;
+      }
+    }).map(function(contact) { return Number(contact.id) });
 
     $('.contact').each(function() {
-      $(this).toggle($(this).find('.contact-name').text().toLowerCase().indexOf(search) >= 0 ||
-                     $(this).find('.contact-email').text().toLowerCase().indexOf(search) >= 0 ||
-                     $(this).find('.contact-phone').text().indexOf(search) >= 0 ||
-                     $(this).find('.tag').text().indexOf(search) >= 0);
+      $(this).toggle(matchedIDs.indexOf($(this).data('id')) >= 0);
     });
 
-    if ($('.contact:visible').length === 0) {
+    if (matchedIDs.length === 0) {
       this.$section.find('.no-contacts').html('No Contacts starting with: ' + search);
       this.$section.find('.no-contacts').show();
     } else {
@@ -161,6 +155,7 @@ var Contacts = {
         self.confirmDeletion($currentContact);
       } else if ($target.hasClass('no')) {
         self.hideVisibleConfirmation();
+        self.showEditAndDeleteButtons($currentContact);
       } else if ($target.hasClass('yes')) {
         self.delete($currentContact);
       } else if ($target.hasClass('tag')) {
@@ -233,7 +228,7 @@ var Form = {
     $('#name').val(currentContact.name);
     $('#email').val(currentContact.email);
     $('#phone').val(currentContact.phone);
-    $('#tags').val(currentContact.tags);
+    $('#tags').val(currentContact.tags.join(' '));
   },
 
   /*
