@@ -6,12 +6,7 @@ var Contacts = {
   // Will add a contact to the array of contacts(list) using the data provided
   add: function(contact) {
     this.list.push(contact);
-    this.$section.append(App.contactTemplate({
-      name: contact.name,
-      email: contact.email,
-      phone: contact.phone,
-      tags: contact.tags,
-    }));
+    this.$section.append(App.contactTemplate(contact));
     $('.no-contacts').hide();
 
     if (this.list.length > 0) {
@@ -19,32 +14,25 @@ var Contacts = {
     }
   },
 
-  /*
-  * Gets the index of the contact being edited using getIndex()
-  * Gets the form's data. Getting the data assigns a new ID to the contact
-  * Replaces the new ID with the old one to keep it consistent
-  * Replaces the old contact object in the array of contacts(list) with the new one
-  */
+  // Edits the current contact with the new form data
   edit: function() {
-    var index = this.getIndex(this.currentContact.id);
     var editedContact = Form.getData();
-    editedContact.id = this.currentContact.id;
-    this.list[index] = editedContact;
+    this.currentContact.name = editedContact.name;
+    this.currentContact.email = editedContact.email;
+    this.currentContact.phone = editedContact.phone;
+    this.currentContact.tags = editedContact.tags;
     this.render();
   },
 
   /*
-  * Sets the data of the current contact being edited
+  * Finds which contact will be edited based on the id of the element
   * Sets editing to true so that when submit is clicked, the appropriate behavior will happen
   */
   handleEdit: function($currentContact) {
-    this.currentContact.id = String($currentContact.data('id'));
-    this.currentContact.name = $currentContact.find('.contact-name').text();
-    this.currentContact.email = $currentContact.find('.contact-email').text();
-    this.currentContact.phone = $currentContact.find('.contact-phone').text();
-    this.currentContact.tags = $.map($currentContact.find('.tag'), function(tag) {
-      return $(tag).text();
-    }).join(' ');
+    var contactID = String($currentContact.data('id'));
+    this.currentContact = $.grep(this.list, function(contact) {
+      return contact.id === contactID;
+    }.bind(this))[0];
 
     this.resetConfirmation();
     Form.toggle();
