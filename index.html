@@ -26,10 +26,10 @@
           Contains the form
           Will appear when 'Add Contact' or 'Edit' is clicked
         -->
-        <section id="add-new">
+        <section id="form-section">
           <h2>Create Contact</h2>
 
-          <form action="#" method="post">
+          <form action="#" method="post" novalidate>
             <p id="form-error">Please fix the errors before submitting the form.</p>
             <fieldset>
               <dl>
@@ -76,20 +76,14 @@
     </div>
 
     <!--
-      Emtpy list template
-      Will display when there are no contacts in the list
-    -->
-    <script type="text/x-handlebars-template" id="contact-error">
-      <div class="no-contacts">
-        <p>{{error}}</p>
-      </div>
-    </script>
-
-    <!--
       Contact list template
       Will use the contact data and populate every contact in the #contacts section with the contact partial
     -->
     <script type="text/x-handlebars-template" id="contact-list">
+      <div class="no-contacts">
+        <p class="contact-error">No Contacts</p>
+      </div>
+
       {{#each contact}}
       {{> contact-template}}
       {{/each}}
@@ -107,14 +101,12 @@
           <dt>Email:</dt>
           <dd class="contact-email">{{email}}</dd>
 
-          {{#if tags}}
           <dt>Tags:</dt>
-          <dd>
-            {{#each this.tags}}
-            <span class="tag">{{this}}</span>
-            {{/each}}
+          <dd class="tags">
+            {{#if tags}}
+            {{> tags-template}}
+            {{/if}}
           </dd>
-          {{/if}}
         </dl>
 
         <p class="confirm">Are you sure?</p>
@@ -129,6 +121,13 @@
           <button class="no">No</button>
         </div>
       </div>
+    </script>
+
+    <!-- Tag template -->
+    <script type="text/x-handlebars-template" id="tags-template">
+      {{#each tags}}
+      <span class="tag">{{this}}</span>
+      {{/each}}
     </script>
 
     <script src="js/app.js"></script>

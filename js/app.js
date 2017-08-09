@@ -1,196 +1,120 @@
-var Contacts = {
-  $section: $('#contacts'),
-  currentContact: {},
-  editing: false,
-
-  // Will add a contact to the array of contacts(list) using the data provided
-  add: function(contact) {
-    this.list.push(contact);
-    this.$section.append(App.contactTemplate(contact));
-    $('.no-contacts').hide();
-
-    if (this.list.length > 0) {
-      App.toggleSearch(false, 'Search');
-    }
-  },
-
-  // Edits the current contact with the new form data
-  edit: function() {
-    var editedContact = Form.getData();
-    this.currentContact.name = editedContact.name;
-    this.currentContact.email = editedContact.email;
-    this.currentContact.phone = editedContact.phone;
-    this.currentContact.tags = editedContact.tags;
-    this.render();
-  },
-
-  /*
-  * Finds which contact will be edited based on the id of the element
-  * Sets editing to true so that when submit is clicked, the appropriate behavior will happen
-  */
-  handleEdit: function($currentContact) {
-    var contactID = String($currentContact.data('id'));
-    this.currentContact = $.grep(this.list, function(contact) {
-      return contact.id === contactID;
-    }.bind(this))[0];
-
-    this.hideVisibleConfirmation();
-    Form.toggle();
-    Form.setData(this.currentContact);
-    this.editing = true;
-  },
-  confirmDeletion: function($currentContact) {
-    this.hideVisibleConfirmation();
-    this.hideEditAndDeleteButtons($currentContact);
-    this.showDeleteConfirmation($currentContact);
-  },
-  hideVisibleConfirmation: function() {
-    $('.confirm').animate({
-      opacity: 0,
-    }, 100);
-    $('.edit-delete').fadeIn();
-    $('.yes-no').fadeOut();
-  },
-  hideEditAndDeleteButtons: function($currentContact) {
-    $currentContact.find('.edit-delete').fadeOut();
-  },
-  showDeleteConfirmation: function($currentContact) {
-    $currentContact.find('.confirm').animate({
-      opacity: 1,
-    }, 400);
-
-    $currentContact.find('.yes-no').fadeIn();
-  },
-  getIndex: function(id) {
-    return this.list.indexOf(this.list.find(function(contact) {
-      return contact.id === id;
-    }));
-  },
-  delete: function($currentContact) {
-    var index = this.getIndex(String($currentContact.data('id')));
-
-    this.removeContactFromUI($currentContact);
-    this.removeContactFromList($currentContact);
-
-    if (this.list.length === 0) {
-      $('.no-contacts').html('No Contacts').fadeIn(400);
-      App.toggleSearch(true, 'No contacts to search');
-    }
-  },
-  removeContactFromUI: function($currentContact) {
-    $currentContact.fadeOut(400, function() {
-      $currentContact.remove();
-
-      if (this.list.length !== 0) {
-        this.filter();
-      }
-    }.bind(this));
-  },
-  removeContactFromList: function($currentContact) {
-    var index = this.getIndex(String($currentContact.data('id')));
-
-    this.list.splice(index, 1);
-    localStorage.setItem('list', JSON.stringify(Contacts.list));
-  },
-
-  // Sets the search box to the value of the clicked tag
-  handleTagClick: function(tag) {
-    $('#search').val(tag);
-    this.filter();
-  },
-
-  /*
-  * Filters the contacts and toggles visibility based on search input
-  * Displays an error message if no matches found
-  */
-  filter: function() {
-    var search = $('#search').val().toLowerCase();
-    var matchedIDs = this.list.filter(function(contact) {
-      if (contact.name.toLowerCase().indexOf(search) >= 0 ||
-          contact.email.toLowerCase().indexOf(search) >= 0 ||
-          contact.phone.indexOf(search) >= 0 ||
-          contact.tags.indexOf(search) >= 0) {
-        return contact;
-      }
-    }).map(function(contact) { return Number(contact.id) });
-
-    $('.contact').each(function() {
-      $(this).toggle(matchedIDs.indexOf($(this).data('id')) >= 0);
-    });
-
-    if (matchedIDs.length === 0) {
-      this.$section.find('.no-contacts').html('No Contacts starting with: ' + search);
-      this.$section.find('.no-contacts').show();
-    } else {
-      this.$section.find('.no-contacts').hide();
-    }
-  },
-
-  /*
-  * Renders the 'no-contacts' error div, hides it if the list is not empty
-  * Renders the list of contacts
-  */
-  render: function() {
-    this.$section.html('');
-
-    this.$section.append(App.errorTemplate({error: 'No Contacts.'}));
-    this.$section.append(App.contactListTemplate({contact: this.list}));
-
-    if (this.list.length !== 0) {
-      this.$section.find('.no-contacts').hide();
-    }
-  },
-  bindEvents: function() {
-    var self = this;
-
-    this.$section.on('click', '.contact', function(e) {
-      e.preventDefault();
-
-      var $target = $(e.target);
-      var $currentContact = $(e.target.closest('.contact'));
-
-      if ($target.hasClass('edit-contact')) {
-        self.handleEdit($currentContact);
-      } else if ($target.hasClass('delete-contact')) {
-        self.confirmDeletion($currentContact);
-      } else if ($target.hasClass('no')) {
-        self.hideVisibleConfirmation();
-        self.showEditAndDeleteButtons($currentContact);
-      } else if ($target.hasClass('yes')) {
-        self.delete($currentContact);
-      } else if ($target.hasClass('tag')) {
-        self.handleTagClick($target.text());
-      }
-    });
-  },
-
-  // Initializes the Contacts object and sets the list using localStorage
-  init: function() {
-    this.list = JSON.parse(localStorage.getItem('list')) || [];
-    this.bindEvents();
-    this.render();
-
-    if (this.list.length === 0) {
-      App.toggleSearch(true, 'No contacts to search');
-    }
-  }
+var ERRORS = {
+  required: 'This is a required field.',
+  name: 'Name may only contain letters, spaces and apostrophes.',
+  email: 'Please enter a valid email address.',
+  phone: 'Phone Number may only contain numbers, dashes, pluses, spaces and parentheses.',
+  tags: 'Please only use 5 tags or less.',
+  noContacts: 'No contacts',
+  noMatch: 'No contacts matching: ',
 };
 
-var Form = {
-  $form: $('form'),
-  $formError: $('#form-error'),
-  $section: $('#add-new'),
-  toggle: function() {
-    this.$section.slideToggle();
-    Contacts.$section.slideToggle();
-    this.$form.trigger('reset');
+var Contacts = {
+  $contactsSection: $('#contacts'),
+  $searchBar: $('#search'),
+  editingContact: false,
+  handleNewContactClick: function() {
+    this.editingContact = false;
+    this.contactsToggle();
+    Form.formToggle();
   },
+  handleAddContact: function() {
+    var contact = Form.getFormData();
+    contact.id = this.generateRandomID();
 
-  /*
-  * Generates a random 10 digit id for the contact, id will be a String
-  * Checks if the random id already exists, recursively recall the function if it does
-  */
-  generateID: function() {
+    this.addContactToList(contact);
+    this.addContactToUI(contact);
+    this.hideContactError();
+    this.contactsToggle();
+    this.enableOrDisableSearch();
+  },
+  addContactToList: function(contact) {
+    this.list.push(contact);
+    this.saveContactsToStorage();
+  },
+  addContactToUI: function(contact) {
+    this.$contactsSection.append(this.contactTemplate(contact));
+  },
+  handleEditContactClick: function() {
+    this.editingContact = true;
+    Form.setFormData(this.currentContactObj);
+    Form.formToggle();
+    this.contactsToggle();
+  },
+  handleEditContact: function() {
+    this.editContactList();
+    this.editContactUI();
+  },
+  editContactList: function() {
+    var newContactData = Form.getFormData();
+
+    this.currentContactObj.name = newContactData.name;
+    this.currentContactObj.email = newContactData.email;
+    this.currentContactObj.phone = newContactData.phone;
+    this.currentContactObj.tags = newContactData.tags;
+    this.contactsToggle();
+    this.saveContactsToStorage();
+  },
+  editContactUI: function() {
+    this.toggleTagView();
+    this.$currentContactDiv.find('.contact-name').text(this.currentContactObj.name);
+    this.$currentContactDiv.find('.contact-email').text(this.currentContactObj.email);
+    this.$currentContactDiv.find('.contact-phone').text(this.currentContactObj.phone);
+    this.$currentContactDiv.find('.contact-tags').text(this.currentContactObj.tags);
+    this.$currentContactDiv.find('.tags').html(this.tagsTemplate({tags:this.currentContactObj.tags}));
+  },
+  toggleTagView: function() {
+    if (this.currentContactObj.tags[0] === '') {
+      this.$currentContactDiv.find('.tags').hide();
+    } else {
+      this.$currentContactDiv.find('.tags').show();
+    }
+  },
+  handleDeleteClick: function() {
+    this.hideEditAndDeleteButtons();
+    this.showDeleteConfirmation();
+  },
+  deleteContact: function() {
+    this.removeContactFromUI();
+    this.removeContactFromList();
+    this.enableOrDisableSearch();
+
+    if (this.list.length === 0) {
+      this.showContactError(ERRORS.noContacts);
+    }
+  },
+  removeContactFromUI: function() {
+    this.$currentContactDiv.fadeOut(400, function() {
+      $(this).remove();
+    });
+  },
+  removeContactFromList: function() {
+    this.list.splice(this.currentContactIndex, 1);
+    this.saveContactsToStorage();
+  },
+  handleHideDelete: function() {
+    this.hideDeleteConfirmation();
+    this.showEditAndDeleteButtons();
+  },
+  showEditAndDeleteButtons: function() {
+    this.$contactsSection.find('.edit-delete').fadeIn();
+  },
+  hideEditAndDeleteButtons: function() {
+    this.$currentContactDiv.find('.edit-delete').fadeOut();
+  },
+  showDeleteConfirmation: function() {
+    this.$currentContactDiv.find('.confirm').animate({ opacity: 1 }, 400);
+    this.$currentContactDiv.find('.yes-no').fadeIn();
+  },
+  hideDeleteConfirmation: function() {
+    this.$contactsSection.find('.confirm').animate({ opacity: 0 }, 400);
+    this.$contactsSection.find('.yes-no').fadeOut();
+  },
+  getContactIndex: function() {
+    return this.list.indexOf(this.list.find(function(contact) {
+      return contact.id === this.$currentContactDiv.data('id').toString();
+    }.bind(this)));
+  },
+  generateRandomID: function() {
     var id = '';
     var ids;
     var i;
@@ -204,16 +128,169 @@ var Form = {
     });
 
     if (ids.indexOf(id) >= 0) {
-      return this.generateID();
+      return this.generateRandomID();
     }
 
     return id;
   },
+  contactsToggle: function() {
+    this.$contactsSection.slideToggle();
+  },
+  render: function() {
+    this.$contactsSection.append(this.contactListTemplate({contact: this.list}));
 
-  // Gets the forms data and returns an object representing the contact
-  getData: function() {
+    if (this.list.length > 0) {
+      this.hideContactError();
+    }
+  },
+  hideContactError: function() {
+    $('.no-contacts').hide();
+  },
+  showContactError: function(error) {
+    $('.contact-error').text(error);
+    $('.no-contacts').show();
+  },
+  getContactsFromStorage: function() {
+    this.list = JSON.parse(localStorage.getItem('list')) || [];
+  },
+  saveContactsToStorage: function() {
+    localStorage.setItem('list', JSON.stringify(this.list));
+  },
+  handleFiltering: function() {
+    var searchTerm = this.$searchBar.val().toLowerCase();
+    this.getFilteredContacts(searchTerm);
+    this.toggleFilteredContacts();
+
+    if (this.filteredIDs.length === 0) {
+      this.showContactError(ERRORS.noMatch + searchTerm);
+    } else {
+      this.hideContactError();
+    }
+  },
+  getFilteredContacts: function(searchTerm) {
+    this.filteredIDs = this.list.filter(function(contact) {
+      if (contact.name.toLowerCase().indexOf(searchTerm) >= 0 ||
+          contact.email.toLowerCase().indexOf(searchTerm) >= 0 ||
+          contact.phone.indexOf(searchTerm) >= 0 ||
+          contact.tags.indexOf(searchTerm) >= 0) {
+        return contact;
+      }
+    }).map(function(contact) { return Number(contact.id) });
+  },
+  toggleFilteredContacts: function() {
+    var self = this;
+
+    $('.contact').each(function() {
+      $(this).toggle(self.filteredIDs.indexOf($(this).data('id')) >= 0);
+    });
+  },
+  handleTagClick: function(tag) {
+    this.setSearchBarText(tag.text());
+    this.handleFiltering();
+  },
+  setSearchBarText: function(tag) {
+    this.$searchBar.val(tag);
+  },
+  resetSearchBar: function() {
+    this.$searchBar.val('');
+    this.handleFiltering();
+  },
+  enableOrDisableSearch: function() {
+    if (this.list.length === 0) {
+      this.toggleSearchBar(true, 'No contacts to search.');
+    } else {
+      this.toggleSearchBar(false, 'Search');
+    }
+  },
+  toggleSearchBar: function(disabled, message) {
+    this.resetSearchBar();
+    this.$searchBar.prop('placeholder', message);
+    this.$searchBar.prop('disabled', disabled);
+    $('.reset').prop('disabled', disabled);
+  },
+  bindContactsEvents: function() {
+    $('.add-contact').on('click', this.handleNewContactClick.bind(this));
+    $('.reset').on('click', this.resetSearchBar.bind(this));
+    this.$searchBar.on('input', this.handleFiltering.bind(this));
+
+    this.$contactsSection.on('click', '.contact', function(e) {
+      var $target = $(e.target);
+      
+      if (e.target.tagName === 'BUTTON') {
+        this.$currentContactDiv = $target.closest('.contact');
+        this.currentContactIndex = this.getContactIndex();
+        this.currentContactObj = this.list[this.currentContactIndex];
+      }
+
+      if ($target.hasClass('delete-contact')) {
+        this.handleDeleteClick();
+      } else if ($target.hasClass('yes')) {
+        this.deleteContact();
+      } else if ($target.hasClass('edit-contact')) {
+        this.handleEditContactClick();
+      } else if ($target.hasClass('tag')) {
+        this.handleTagClick($target);
+      }
+    }.bind(this));
+  },
+  cacheContactTemplates: function() {
+    var contactListTemplate = $('#contact-list').remove().html();
+    var contactTemplate = $('#contact-template').remove().html();
+    var tagsTemplate = $('#tags-template').remove().html();
+    var contactTemplatePartial = Handlebars.registerPartial('contact-template', contactTemplate);
+    var tagsTemplatePartial = Handlebars.registerPartial('tags-template', tagsTemplate);
+
+    this.contactTemplate = Handlebars.compile(contactTemplate);
+    this.contactListTemplate = Handlebars.compile(contactListTemplate);
+    this.tagsTemplate = Handlebars.compile(tagsTemplate);
+  },
+  registerContactHelpers: function() {
+    Handlebars.registerHelper('if', function(tags, options) {
+      if (tags.join(' ').length > 0) {
+        return options.fn(this);
+      }
+    });
+  },
+  init: function() {
+    this.cacheContactTemplates();
+    this.registerContactHelpers();
+    this.bindContactsEvents();
+    this.getContactsFromStorage();
+    this.enableOrDisableSearch();
+    this.render();
+  }
+};
+
+var Form = {
+  $formSection: $('#form-section'),
+  $form: $('form'),
+  handleSubmit: function() {
+    this.validateForm();
+
+    if (!this.validForm) {
+      $('#form-error').animate({ opacity: 1 }, 250);
+    } else {
+      if (Contacts.editingContact) {
+        Contacts.handleEditContact();
+      } else {
+        Contacts.handleAddContact();
+      }
+
+      this.resetForm();
+    }
+  },
+  formToggle: function() {
+    this.$formSection.slideToggle();
+  },
+  resetForm: function() {
+    this.$form.trigger('reset');
+    this.formToggle();
+    this.$formSection.find('input').removeClass('invalid');
+    this.$formSection.find('.error').animate({ opacity: 0 }, 250);
+    $('#form-error').animate({ opacity: 0 }, 250);
+  },
+  getFormData: function() {
     return {
-      id: this.generateID(),
       name: $('#name').val(),
       email: $('#email').val(),
       phone: $('#phone').val(),
@@ -222,110 +299,53 @@ var Form = {
       }),
     };
   },
-
-  // When the 'Edit' button is clicked, sets the form's data to match the contact to be edited
-  setData: function(currentContact) {
-    $('#name').val(currentContact.name);
-    $('#email').val(currentContact.email);
-    $('#phone').val(currentContact.phone);
-    $('#tags').val(currentContact.tags.join(' '));
+  setFormData: function(contact) {
+    $('#name').val(contact.name);
+    $('#email').val(contact.email);
+    $('#phone').val(contact.phone);
+    $('#tags').val(contact.tags.join(' '));
   },
-
-  /*
-  * Checks if the input to be checked is valid, adds 'invalid' class if not valid and return false
-  * Based on what is wrong(required or invalid format), displays the appropriate error message
-  * Remove the 'invalid' class if valid and return true
-  */
-  validateInput: function(input) {
-    var $errorBox = $(input).parent().find('.error');
-    var inputID = input.id;
-    var inputLength = input.value.split(' ').length;
-    var validity = input.validity;
-    var error = '';
-
-    if (!validity.valid) {
-      input.classList.add('invalid');
-
-      if (validity.valueMissing) {
-        error = 'This is a required field.'
-      } else {
-        if (inputID === 'name') {
-          error = 'Name may only contain letters, spaces and apostrophes.'
-        } else if (inputID === 'email') {
-          error = 'Please enter a valid email address.'
-        } else if (inputID === 'phone') {
-          error = 'Phone Number may only contain numbers, dashes, pluses, spaces and parentheses.'
-        }
-      }
-
-      $errorBox.text(error);
-      return false;
-    } else if (inputID === 'tags' && inputLength > 5) {
-      input.classList.add('invalid');
-      $errorBox.text('Please only use 5 tags or less.');
-      return false;
-    } else {
-      input.classList.remove('invalid');
-      $errorBox.text('');
-      return true;
-    }
-  },
-
-  // Loops through all form inputs and sets 'isValid' to false if any of them are not valid
   validateForm: function() {
     var self = this;
-    var isValid = true;
+    this.validForm = true;
 
     this.$form.find('input').each(function() {
       if (!self.validateInput(this)) {
-        isValid = false;
+        self.validForm = false;
       }
     });
+  },
+  validateInput: function(input) {
+    var inputID = input.id;
+    var inputLength = input.value.trim().split(' ').length;
+    var inputValidity = input.validity;
+    var error;
+
+    if (!inputValidity.valid || (inputID === 'tags' && inputLength > 5)) {
+      if (inputValidity.valueMissing) {
+        error = ERRORS.required;
+      } else {
+        error = ERRORS[inputID];
+      }
+
+      this.displayInputError(input, error);
+      isValid = false;
+    } else {
+      this.removeInputError(input);
+      isValid = true;
+    }
 
     return isValid;
   },
-
-  /*
-  * If the form is valid, checks 'editing' property of the Contacts object to get the appropriate behavior
-  * Update localStorage with the new contact data
-  * Displays the form error message if the form is not valid
-  */
-  handleSubmit: function() {
-    var data = this.getData();
-
-    if (this.validateForm()) {
-      if (Contacts.editing) {
-        Contacts.edit();
-      } else {
-        Contacts.add(data);
-      }
-
-      localStorage.setItem('list', JSON.stringify(Contacts.list));
-      this.toggle();
-    } else {
-      this.$formError.animate({
-        opacity: 1,
-      }, 400);
-    }
+  displayInputError: function(input, error) {
+    $(input).parent().find('.error').text(error).animate({ opacity : 1}, 250);
+    $(input).addClass('invalid');
   },
-
-  // Resets all form data, error message and 'invalid' classes
-  resetForm: function() {
-    this.$form.find('input').removeClass('invalid');
-    this.$form.find('.error').text('');
-
-    this.$formError.animate({
-      opacity: 0,
-    }, 400);
+  removeInputError: function(input) {
+    $(input).parent().find('.error').animate({ opacity : 0}, 250);
+    $(input).removeClass('invalid');
   },
-
-  /*
-  * Prevents invalid keys from being entered by the user
-  * For name, prevents keys that are not letters, apostrophes or spaces
-  * For phone, prevents the keys that are not numbers, parentheses, pluses, dashes or spaces
-  * Also limits the tags to 5
-  */
-  preventInvalidInputs: function(e) {
+  preventInvalidKeys: function(e) {
     var target = e.target;
     var key = e.key;
     var wordCount = target.value.trim().split(' ').length;
@@ -336,102 +356,45 @@ var Form = {
       e.preventDefault();
     }
   },
-  bindEvents: function() {
-    this.$form.on('input', function(e) {
-      this.validateInput(e.target);
-    }.bind(this));
-
-    this.$form.on('keypress', 'input', function(e) {
-      if (e.key === 'Enter') {
-        $('.submit').trigger('click');
-      } else {
-        this.preventInvalidInputs(e);
-      }
-    }.bind(this));
-
-    this.$form.on('reset', this.resetForm.bind(this));
-
-    this.$form.on('click', 'button', function(e) {
+  bindFormEvents: function() {
+    this.$formSection.on('click', 'button', function(e) {
       e.preventDefault();
 
       var $target = $(e.target);
 
-      if ($target.hasClass('submit')) {
+      if ($target.hasClass('cancel-add')) {
+        this.resetForm();
+        Contacts.contactsToggle();
+      } else if ($target.hasClass('submit')) {
         this.handleSubmit();
-      } else if ($target.hasClass('cancel-add')) {
-        this.toggle();
       }
+    }.bind(this));
+
+    this.$form.on('input', function(e) {
+      this.validateInput(e.target);
+    }.bind(this)).on('keypress', 'input', function(e) {
+      this.preventInvalidKeys(e);
+    }.bind(this)).on('blur', 'input', function(e) {
+      this.validateInput(e.target);
     }.bind(this));
   },
   init: function() {
-    this.bindEvents();
-  },
+    this.bindFormEvents();
+  }
 };
 
 var App = {
-  cacheTemplates: function() {
-    var errorTemplate = $('#contact-error').remove().html();
-    var contactListTemplate = $('#contact-list').remove().html();
-    var contactTemplate = $('#contact-template').remove().html();
-    var contactTemplatePartial = Handlebars.registerPartial('contact-template', contactTemplate);
-
-    this.errorTemplate = Handlebars.compile(errorTemplate);
-    this.contactTemplate = Handlebars.compile(contactTemplate);
-    this.contactListTemplate = Handlebars.compile(contactListTemplate);
-  },
-
-  /*
-  * Disables or enables the search bar and reset button based on the value passed in
-  */
-  toggleSearch: function(disabled, message) {
-    $('#search').val('');
-    $('#search').prop('disabled', disabled);
-    $('#search').prop('placeholder', message);
-    $('.reset').prop('disabled', disabled);
-  },
   bindEvents: function() {
     $(document).on('click', function(e) {
-      var $target = $(e.target);
-
-      if (e.target.id !== 'github') {
-        e.preventDefault();
-      }
-
-      if (e.target.tagName !== 'BUTTON') {
-        Contacts.hideVisibleConfirmation();
-      } else if ($target.hasClass('add-contact')) {
-        Contacts.editing = false;
-        Form.toggle();
-      } else if ($target.hasClass('reset')) {
-        $('#search').val('');
-        Contacts.filter();
+      if (!$(e.target).hasClass('delete-contact')) {
+        Contacts.handleHideDelete();
       }
     });
-
-    $('#search').on('input', Contacts.filter.bind(Contacts));
-
-    $('#search').on('keypress', function(e) {
-      if (e.key === 'Enter') {
-        $('#search').blur();
-      }
-    })
   },
-
-  /*
-  * Initializes the whole app
-  * Registers a custom 'if' helper to check if tags are present
-  */
   init: function() {
-    Handlebars.registerHelper('if', function(tags, options) {
-      if (tags.join(' ').length > 0) {
-        return options.fn(this)
-      }
-    });
-
-    this.cacheTemplates();
-    this.bindEvents();
     Contacts.init();
     Form.init();
+    this.bindEvents();
   }
 };
 
